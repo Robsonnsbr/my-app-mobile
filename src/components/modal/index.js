@@ -7,15 +7,12 @@ import {
   Pressable,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
+import useStorage from "../../hooks/useStorage";
 
 export const ModalPassword = ({ password, handleClose }) => {
+  const { setItem } = useStorage();
   const [copied, setCopied] = useState(false);
   const [title, setTitle] = useState("Senha gerada");
-
-  const handlePress = (command) => {
-    if (command === "return") return handleClose();
-    if (command === "copy") return handleCopy();
-  };
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(password);
@@ -24,6 +21,11 @@ export const ModalPassword = ({ password, handleClose }) => {
     setTimeout(() => setCopied(false), 1500);
     setTimeout(() => setTitle("Senha gerada"), 1500);
     setTimeout(() => handleClose(), 2000);
+  };
+
+  const handleSave = async () => {
+    // console.log(password);
+    await setItem("@pass", password);
   };
 
   return (
@@ -38,16 +40,13 @@ export const ModalPassword = ({ password, handleClose }) => {
         <View style={styles.containerButtons}>
           <TouchableOpacity
             style={[styles.button, styles.buttonVoltar]}
-            onPress={() => handlePress("return")}
+            onPress={handleClose}
           >
             <Text style={styles.buttonText}>Voltar</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handlePress("copy")}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleSave}>
             <Text style={styles.buttonText}>
-              {copied ? "Copiado!" : "Copiar Senha"}
+              {copied ? "Copiado!" : "Salvar Senha"}
             </Text>
           </TouchableOpacity>
         </View>

@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "top",
+    // justifyContent: "top", //não é possível utilizar o top em react-native
     marginTop: 50,
   },
 
