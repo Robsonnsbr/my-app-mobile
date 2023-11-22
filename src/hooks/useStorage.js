@@ -37,26 +37,31 @@ export default useStorage = () => {
     }
   };
 
-  const deleteItem = async (item) => {
+  const deleteItem = async (key, item) => {
     try {
       const passwordsDB = await getItem(key);
-
-      const HasPassId = passwordsDB.find((password, index) => {
+      const hasPassId = passwordsDB.findIndex((password, index) => {
         if (password === item) {
           return index;
         }
+        return false;
       });
+      const resultIndex = hasPassId !== -1 ? hasPassId : 0;
 
-      if (HasPassId) {
-        const passwordsNews = passwordsArray.filter(
-          (password) => password !== HasPassId
+      if (resultIndex !== -1) {
+        const passwordsNews = passwordsDB.filter(
+          (_, index) => index !== resultIndex
         );
 
-        await AsyncStorage.setItem("password", JSON.stringify(passwordsNews));
-        return passwordsNews;
+        if (passwordsNews.length >= 1) {
+          await AsyncStorage.setItem(key, JSON.stringify(passwordsNews));
+          return passwordsNews;
+        } else {
+          await AsyncStorage.removeItem(key);
+        }
       }
 
-      if (!HasPassId) {
+      if (!hasPassId) {
         console.log(`Password ${item} not found`);
         return `Password not found`;
       }

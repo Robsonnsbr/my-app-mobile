@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { TextInput } from "react-native-paper";
 import { Icon } from "react-native-elements";
@@ -6,18 +6,33 @@ import useStorage from "../../hooks/useStorage";
 const { getItem, deleteItem } = useStorage();
 
 export default Passwords = () => {
-  const [copied, setCopied] = useState(false);
+  const [removed, setRemoved] = useState(false);
   const [hidePass, setUpdateState] = useState(false);
-  const [title, setTitle] = useState("Senha gerada");
+  const [title, setUpdateTitle] = useState(false);
+  const [passwords, setPasswords] = useState([]);
+  const [atualizar, setAtualizar] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const passwordsDB = await getItem("@pass");
+        setPasswords(passwordsDB);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      }
+    };
 
-  const handleCopy = async () => {
-    console.log("copiei");
-    // await Clipboard.setStringAsync(password);
-    // setCopied(true);
-    // setTitle("Senha copiada com sucesso!");
-    // setTimeout(() => setCopied(false), 1500);
-    // setTimeout(() => setTitle("Senha gerada"), 1500);
-    // setTimeout(() => handleClose(), 2000);
+    fetchData();
+  }, [removed, atualizar]);
+
+  const handleRemove = async (password) => {
+    setRemoved(!removed);
+    await deleteItem("@pass", password);
+    setUpdateTitle(true);
+    setTimeout(() => setUpdateTitle(false), 1500);
+  };
+
+  const handleEntrarNaTela = () => {
+    setAtualizar((prevState) => prevState + 1);
   };
 
   return (
@@ -29,33 +44,35 @@ export default Passwords = () => {
           color="#f3f3ff"
           name="enhanced-encryption"
         />
-        <Text style={styles.headerBody.title} secureTextEntry={true}>
-          Minhas Senhas
+        <Text
+          style={!title ? styles.headerBody.title : styles.headerBody.title2}
+          secureTextEntry={true}
+        >
+          {title ? (value = "Senha removida") : "Minhas Senhas"}
         </Text>
       </View>
       <View style={styles.content}>
-        <Pressable style={styles.content.outValue} onLongPress={handleCopy}>
-          <TextInput
-            onLongPress={handleCopy}
-            style={styles.content.input}
-            autoCapitalize="none"
-            returnKeyType="next"
-            secureTextEntry={hidePass ? true : false}
-            editable={false}
-            mode="outlined"
-            outlineColor="transparent"
-            activeOutlineColor={false}
-            right={
-              <TextInput.Icon
-                iconColor="#fff"
-                icon="eye"
-                onPress={() => setUpdateState(!hidePass)}
-              />
-            }
+        {passwords.map((password, index) => (
+          <Pressable
+            key={index}
+            style={styles.content.outValue}
+            onLongPress={() => handleRemove(password)}
           >
-            <Text style={{ color: "#fff" }}>TESTE</Text>
-          </TextInput>
-        </Pressable>
+            <TextInput
+              editable={false}
+              style={styles.content.input}
+              secureTextEntry={hidePass ? true : false}
+              value={password}
+              right={
+                <TextInput.Icon
+                  iconColor="#fff"
+                  icon={hidePass ? "eye-off" : "eye"}
+                  onPress={() => setUpdateState(!hidePass)}
+                />
+              }
+            />
+          </Pressable>
+        ))}
       </View>
     </View>
   );
@@ -86,11 +103,21 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       paddingBottom: 10,
     },
+    title2: {
+      alignSelf: "flex-start",
+      marginLeft: 5,
+      margin: -5,
+      color: "#f00",
+      fontSize: 24,
+      fontWeight: "bold",
+      paddingBottom: 10,
+    },
   },
 
   content: {
     flex: 1,
     alignItems: "center",
+    gap: 10,
     // justifyContent: "top", //não é possível utilizar o top em react-native
     marginTop: 50,
     backgroundColor: "#f3f3ff",
@@ -103,17 +130,15 @@ const styles = StyleSheet.create({
       justifyContent: "center",
     },
     input: {
-      flex: 1,
-      // alignItems: "center",
-
       justifyContent: "space-between",
       width: "95%",
+      height: 44,
       backgroundColor: "#000",
       borderRadius: 8,
       fontSize: 24,
-      paddingLeft: 0,
-      paddingRight: 0,
-      color: "#fff",
+      color: "#f00",
+      placeholderTextColor: "green",
+      underlineColorAndroid: "green",
     },
   },
 });
