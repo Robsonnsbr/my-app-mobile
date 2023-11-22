@@ -3,14 +3,17 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { TextInput } from "react-native-paper";
 import { Icon } from "react-native-elements";
 import useStorage from "../../hooks/useStorage";
-const { getItem, deleteItem } = useStorage();
+import { useIsFocused } from "@react-navigation/native";
 
 export default Passwords = () => {
+  const { getItem, deleteItem } = useStorage();
+  const focused = useIsFocused();
+
   const [removed, setRemoved] = useState(false);
   const [hidePass, setUpdateState] = useState(false);
   const [title, setUpdateTitle] = useState(false);
   const [passwords, setPasswords] = useState([]);
-  const [atualizar, setAtualizar] = useState(0);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -22,17 +25,13 @@ export default Passwords = () => {
     };
 
     fetchData();
-  }, [removed, atualizar]);
+  }, [removed, focused]);
 
   const handleRemove = async (password) => {
-    setRemoved(!removed);
     await deleteItem("@pass", password);
+    setRemoved(!removed);
     setUpdateTitle(true);
     setTimeout(() => setUpdateTitle(false), 1500);
-  };
-
-  const handleEntrarNaTela = () => {
-    setAtualizar((prevState) => prevState + 1);
   };
 
   return (
