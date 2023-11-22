@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 import { TextInput } from "react-native-paper";
 
