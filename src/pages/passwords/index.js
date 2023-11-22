@@ -52,7 +52,7 @@ export default Passwords = () => {
       </View>
       <View style={styles.content}>
         <FlatList
-          style={{ flex: 1, paddingTop: 10 }}
+          style={{ flex: 1, paddingTop: 10, marginBottom: 48 }}
           data={listPasswords}
           keyExtractor={(item) => String(item)}
           renderItem={({ item }) => (
