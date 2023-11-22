@@ -14,6 +14,11 @@ export const ModalPassword = ({ password, handleClose }) => {
   const [copied, setCopied] = useState(false);
   const [title, setTitle] = useState("Senha gerada");
 
+  const handleSave = async () => {
+    // console.log(password);
+    await setItem("@pass", password);
+  };
+
   const handleCopy = async () => {
     await Clipboard.setStringAsync(password);
     setCopied(true);
@@ -21,11 +26,7 @@ export const ModalPassword = ({ password, handleClose }) => {
     setTimeout(() => setCopied(false), 1500);
     setTimeout(() => setTitle("Senha gerada"), 1500);
     setTimeout(() => handleClose(), 2000);
-  };
-
-  const handleSave = async () => {
-    // console.log(password);
-    await setItem("@pass", password);
+    handleSave();
   };
 
   return (

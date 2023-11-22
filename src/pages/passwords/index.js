@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { TextInput } from "react-native-paper";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "react-native-elements";
 import useStorage from "../../hooks/useStorage";
 import { useIsFocused } from "@react-navigation/native";
+import Item from "./components/item";
 
 export default Passwords = () => {
   const { getItem, deleteItem } = useStorage();
   const focused = useIsFocused();
 
   const [removed, setRemoved] = useState(false);
-  const [hidePass, setUpdateState] = useState(false);
   const [title, setUpdateTitle] = useState(false);
-  const [passwords, setPasswords] = useState([]);
+  const [listPasswords, setListPasswords] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const passwordsDB = await getItem("@pass");
-        setPasswords(passwordsDB);
+        const loadPasswords = await getItem("@pass");
+        setListPasswords(loadPasswords);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       }
@@ -31,11 +31,11 @@ export default Passwords = () => {
     await deleteItem("@pass", password);
     setRemoved(!removed);
     setUpdateTitle(true);
-    setTimeout(() => setUpdateTitle(false), 1500);
+    setTimeout(() => setUpdateTitle(false), 500);
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.headerBody}>
         <Icon
           style={styles.headerBody.iconUnlock}
@@ -51,36 +51,22 @@ export default Passwords = () => {
         </Text>
       </View>
       <View style={styles.content}>
-        {passwords.map((password, index) => (
-          <Pressable
-            key={index}
-            style={styles.content.outValue}
-            onLongPress={() => handleRemove(password)}
-          >
-            <TextInput
-              editable={false}
-              style={styles.content.input}
-              secureTextEntry={hidePass ? true : false}
-              value={password}
-              right={
-                <TextInput.Icon
-                  iconColor="#fff"
-                  icon={hidePass ? "eye-off" : "eye"}
-                  onPress={() => setUpdateState(!hidePass)}
-                />
-              }
-            />
-          </Pressable>
-        ))}
+        <FlatList
+          style={{ flex: 1, paddingTop: 10 }}
+          data={listPasswords}
+          keyExtractor={(item) => String(item)}
+          renderItem={({ item }) => (
+            <Item item={item} handleRemove={() => handleRemove(item)} />
+          )}
+        />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
     justifyContent: "center",
   },
 
@@ -115,29 +101,6 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    alignItems: "center",
-    gap: 10,
-    // justifyContent: "top", //não é possível utilizar o top em react-native
-    marginTop: 50,
     backgroundColor: "#f3f3ff",
-    outValue: {
-      width: "95%",
-      borderRadius: 8,
-      height: 44,
-      backgroundColor: "transparent",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    input: {
-      justifyContent: "space-between",
-      width: "95%",
-      height: 44,
-      backgroundColor: "#000",
-      borderRadius: 8,
-      fontSize: 24,
-      color: "#f00",
-      placeholderTextColor: "green",
-      underlineColorAndroid: "green",
-    },
   },
 });
